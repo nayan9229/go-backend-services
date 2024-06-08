@@ -31,7 +31,7 @@
             "--signal" "SIGHUP"
             "-w" "."
             "-e" "go,html"
-            "-x" "go run main.go -addr localhost:$PORT"
+            "-x" "go run ~/go-backend-services/services/template-service/main.go -addr localhost:$PORT"
           ];
           manager = "web";
         };
