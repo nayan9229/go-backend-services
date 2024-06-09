@@ -12,10 +12,10 @@ GET http://localhost:{{PORT}}/json
 ###
 GET http://localhost:{{PORT}}/users
 ###
-GET http://localhost:{{PORT}}/user/57786696
+GET http://localhost:{{PORT}}/users/723003922
 
 ###
-POST http://localhost:{{PORT}}/user
+POST http://localhost:{{PORT}}/users
 content-type: application/json
 
 {
@@ -27,7 +27,7 @@ content-type: application/json
 
 ###
 
-PATCH http://localhost:{{PORT}}/user/57786696
+PATCH http://localhost:{{PORT}}/users/57786696
 content-type: application/json
 
 {
@@ -39,6 +39,41 @@ content-type: application/json
 
 
 ###
-DELETE http://localhost:{{PORT}}/user/57786696
+DELETE http://localhost:{{PORT}}/users/57786696
+
+###
+
+
+###
+GET http://localhost:{{PORT}}/bson/users
+###
+GET http://localhost:{{PORT}}/bson/users/6665f2e15cb2e3c7c92ee9a9
+
+###
+POST http://localhost:{{PORT}}/bson/users
+content-type: application/json
+
+{
+    "first_name": "Jane d",
+    "last_name": "Doe",
+    "email": "jane.doe@example.com",
+    "password": "newsecurepassword"
+}
+
+###
+
+PATCH http://localhost:{{PORT}}/bson/users/6665f23c5cb2e3c7c92ee9a8
+content-type: application/json
+
+{
+    "first_name": "Jane Upgrade",
+    "last_name": "Doe",
+    "email": "jane.doe@example.com",
+    "password": "newsecurepassword"
+}
+
+
+###
+DELETE http://localhost:{{PORT}}/bson/users/6665f1ef5cb2e3c7c92ee9a7
 
 ###

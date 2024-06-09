@@ -13,7 +13,7 @@ type Server struct {
 	chassis.Server
 	stageEnv bool
 	sqlDb    db.DB
-	// jsonDb   db.JsonDB
+	jsonDb   db.JsonDB
 }
 
 type Config struct {
@@ -21,6 +21,7 @@ type Config struct {
 	DevMode    bool   `env:"DEV_MODE,default=false"`
 	DBQueryLog bool   `env:"DATABASE_QUERY_LOG,default=true"`
 	DBURL      string `env:"DATABASE_URL,require=true"`
+	JSON_DBURL string `env:"JSON_DATABASE_URL,require=true"`
 }
 
 func NewServer(cfg *Config) *Server {
@@ -37,9 +38,17 @@ func NewServer(cfg *Config) *Server {
 	if err != nil {
 		log.Fatal().Err(err).Msg("couldn't connect to user database")
 	}
-	// s.jsonDb, err = db.NewMongoClient(timeout, cfg.DBURL, cfg.DBQueryLog)
-	// if err != nil {
-	// 	log.Fatal().Err(err).Msg("couldn't connect to user database")
-	// }
+
+	s.jsonDb, err = db.NewMongoClient(timeout, cfg.JSON_DBURL, cfg.DBQueryLog)
+	if err != nil {
+		log.Fatal().Err(err).Msg("couldn't connect to user database")
+	}
+
+	defer func() {
+		if err := s.jsonDb.Close(); err != nil {
+			log.Fatal().Err(err).Msg("couldn't disconnect to mongo database")
+		}
+	}()
+
 	return s
 }

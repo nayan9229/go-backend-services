@@ -21,3 +21,5 @@
 go.work
 
 .env
+.idx/dev.nix
+.vscode

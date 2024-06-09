@@ -1,10 +1,15 @@
 package db
 
 import (
+	"context"
 	"database/sql"
 	"errors"
+	"time"
 
 	"github.com/nayan9229/go-backend-services/services/template-service/model"
+	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/bson/primitive"
+	"go.mongodb.org/mongo-driver/mongo"
 )
 
 const qGetUsers = `SELECT user_id, first_name, last_name, email FROM USERS OFFSET 0 LIMIT 1000;`
@@ -109,4 +114,36 @@ func (lh *LHClient) DeleteUser(UserID int) error {
 		return err
 	}
 	return nil
+}
+
+// InsertUser inserts a new user into the users collection
+func (h *MongoClient) InsertUser(user model.UserBson) (*mongo.InsertOneResult, error) {
+	return h.DB.Collection("users").InsertOne(context.TODO(), user)
+}
+
+// FindUserByID finds a user by their ID in the users collection
+func (h *MongoClient) FindUserByID(id primitive.ObjectID) (*model.UserBson, error) {
+	var user model.UserBson
+	collection := h.DB.Collection("users")
+	timeout, cancel := context.WithTimeout(context.Background(), time.Second*60)
+	defer cancel()
+	err := collection.FindOne(timeout, bson.M{"_id": id}).Decode(&user)
+	if err != nil {
+		return nil, err
+	}
+	return &user, nil
+}
+
+// UpdateUser updates an existing user in the users collection
+func (h *MongoClient) UpdateUser(id primitive.ObjectID, update bson.M) (*mongo.UpdateResult, error) {
+	timeout, cancel := context.WithTimeout(context.Background(), time.Second*60)
+	defer cancel()
+	return h.DB.Collection("users").UpdateOne(timeout, bson.M{"_id": id}, bson.M{"$set": update})
+}
+
+// DeleteUser deletes a user from the users collection
+func (h *MongoClient) DeleteUser(id primitive.ObjectID) (*mongo.DeleteResult, error) {
+	timeout, cancel := context.WithTimeout(context.Background(), time.Second*60)
+	defer cancel()
+	return h.DB.Collection("users").DeleteOne(timeout, bson.M{"_id": id})
 }

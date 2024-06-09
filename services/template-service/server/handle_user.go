@@ -12,6 +12,8 @@ import (
 	"github.com/nayan9229/go-backend-services/chassis"
 	"github.com/nayan9229/go-backend-services/services/template-service/model"
 	"github.com/rs/zerolog/log"
+	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 func (s *Server) GetUsers(w http.ResponseWriter, r *http.Request) (interface{}, error) {
@@ -112,6 +114,85 @@ func (s *Server) DeleteUserByID(w http.ResponseWriter, r *http.Request) (interfa
 		return chassis.BadRequest(w, r, err)
 	}
 	err = s.sqlDb.DeleteUser(userID)
+	if err != nil {
+		log.Err(err).Msg("error while deleting user")
+		return chassis.BadRequest(w, r, err)
+	}
+	return chassis.NoContent(w, r)
+}
+
+func (s *Server) InsertUser(w http.ResponseWriter, r *http.Request) (interface{}, error) {
+	var user model.UserBson
+	body, err := chassis.ReadBody(r, 0)
+	if err != nil {
+		log.Error().Err(err).Msg("chassis reading req body")
+		return chassis.BadRequest(w, r, err)
+	}
+	err = json.Unmarshal(body, &user)
+	if err != nil {
+		log.Error().Err(err).Msg("chassis reading req body")
+		return chassis.BadRequest(w, r, err)
+	}
+
+	_, err = s.jsonDb.InsertUser(user)
+	if err != nil {
+		log.Err(err).Msg("error while creating user")
+		return chassis.BadRequest(w, r, err)
+	}
+	return chassis.NoContent(w, r)
+}
+
+func (s *Server) FindUserByID(w http.ResponseWriter, r *http.Request) (interface{}, error) {
+	UserID := chi.URLParam(r, "userID")
+	objID, err := primitive.ObjectIDFromHex(UserID)
+	if err != nil {
+		http.Error(w, "Invalid ID", http.StatusBadRequest)
+		return chassis.BadRequest(w, r, err)
+	}
+	user, err := s.jsonDb.FindUserByID(objID)
+	if err != nil {
+		log.Err(err).Msg("error while fetching user by id")
+		return chassis.BadRequest(w, r, err)
+	}
+
+	return user, nil
+}
+
+func (s *Server) UpdateUser(w http.ResponseWriter, r *http.Request) (interface{}, error) {
+	UserID := chi.URLParam(r, "userID")
+	objID, err := primitive.ObjectIDFromHex(UserID)
+	if err != nil {
+		http.Error(w, "Invalid ID", http.StatusBadRequest)
+		return chassis.BadRequest(w, r, err)
+	}
+	var user model.UserBson
+	body, err := chassis.ReadBody(r, 0)
+	if err != nil {
+		log.Error().Err(err).Msg("chassis reading req body")
+		return chassis.BadRequest(w, r, err)
+	}
+	err = json.Unmarshal(body, &user)
+	if err != nil {
+		log.Error().Err(err).Msg("chassis reading req body")
+		return chassis.BadRequest(w, r, err)
+	}
+	s.jsonDb.UpdateUser(objID, bson.M{
+		"first_name": user.FirstName,
+		"last_name":  user.LastName,
+		"email":      user.Email,
+		"password":   user.Password,
+	})
+	return user, nil
+}
+
+func (s *Server) DeleteUser(w http.ResponseWriter, r *http.Request) (interface{}, error) {
+	UserID := chi.URLParam(r, "userID")
+	objID, err := primitive.ObjectIDFromHex(UserID)
+	if err != nil {
+		http.Error(w, "Invalid ID", http.StatusBadRequest)
+		return chassis.BadRequest(w, r, err)
+	}
+	_, err = s.jsonDb.DeleteUser(objID)
 	if err != nil {
 		log.Err(err).Msg("error while deleting user")
 		return chassis.BadRequest(w, r, err)

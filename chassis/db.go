@@ -5,6 +5,8 @@ import (
 
 	"github.com/jmoiron/sqlx"
 	"github.com/pkg/errors"
+	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
 type assetFunc func(name string) ([]byte, error)
@@ -29,6 +31,20 @@ func DBConnect(ctx context.Context, dbName string, dbURL string, dbDriver string
 	return db, nil
 }
 
-func DBConnectJson(ctx context.Context, dbName string, dbURL string) (*sqlx.DB, error) {
-	return nil, nil
+func DBConnectJson(ctx context.Context, dbName string, dbURL string) (*mongo.Database, error) {
+	loggerOptions := options.
+		Logger().
+		SetComponentLevel(options.LogComponentCommand, options.LogLevelDebug)
+
+	client, err := mongo.Connect(ctx, options.Client().
+		ApplyURI(dbURL).SetLoggerOptions(loggerOptions))
+	if err != nil {
+		return nil, errors.Wrap(err, "opening "+dbName+" database")
+	}
+	db := client.Database(dbName)
+	err = db.Client().Ping(ctx, nil)
+	if err != nil {
+		return nil, errors.Wrap(err, "pinging "+dbName+" database")
+	}
+	return db, nil
 }

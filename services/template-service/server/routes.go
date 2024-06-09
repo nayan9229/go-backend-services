@@ -15,11 +15,21 @@ func (s *Server) routes() chi.Router {
 	r.Get("/html", chassis.HtmlHandler(s.HtmlHandler))
 	r.Get("/json", chassis.SimpleHandler(s.JsonHandler))
 
-	r.Get("/users", chassis.SimpleHandler(s.GetUsers))
-	r.Get("/user/{userID}", chassis.SimpleHandler(s.GetUserByID))
-	r.Post("/user", chassis.SimpleHandler(s.CreateUsers))
-	r.Patch("/user/{userID}", chassis.SimpleHandler(s.UpdateUserByID))
-	r.Delete("/user/{userID}", chassis.SimpleHandler(s.DeleteUserByID))
+	r.Route("/users", func(r chi.Router) {
+		r.Get("/", chassis.SimpleHandler(s.GetUsers))
+		r.Post("/", chassis.SimpleHandler(s.CreateUsers))
+		r.Get("/{userID}", chassis.SimpleHandler(s.GetUserByID))
+		r.Patch("/{userID}", chassis.SimpleHandler(s.UpdateUserByID))
+		r.Delete("/{userID}", chassis.SimpleHandler(s.DeleteUserByID))
+	})
+
+	r.Route("/bson/users", func(r chi.Router) {
+		// r.Get("/", chassis.SimpleHandler(s.GetUsers))
+		r.Post("/", chassis.SimpleHandler(s.InsertUser))
+		r.Get("/{userID}", chassis.SimpleHandler(s.FindUserByID))
+		r.Patch("/{userID}", chassis.SimpleHandler(s.UpdateUser))
+		r.Delete("/{userID}", chassis.SimpleHandler(s.DeleteUser))
+	})
 
 	return r
 }
