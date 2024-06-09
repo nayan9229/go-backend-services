@@ -18,8 +18,8 @@ func (s *Server) routes() chi.Router {
 	r.Get("/users", chassis.SimpleHandler(s.GetUsers))
 	r.Get("/user/{userID}", chassis.SimpleHandler(s.GetUserByID))
 	r.Post("/user", chassis.SimpleHandler(s.CreateUsers))
-	r.Patch("/user", chassis.SimpleHandler(s.UpdateUserByID))
-	r.Delete("/user", chassis.SimpleHandler(s.DeleteUserByID))
+	r.Patch("/user/{userID}", chassis.SimpleHandler(s.UpdateUserByID))
+	r.Delete("/user/{userID}", chassis.SimpleHandler(s.DeleteUserByID))
 
 	return r
 }

@@ -1,23 +1,120 @@
 package server
 
-import "net/http"
+import (
+	"encoding/json"
+	"errors"
+	"math/rand"
+	"net/http"
+	"strconv"
+	"time"
+
+	"github.com/go-chi/chi/v5"
+	"github.com/nayan9229/go-backend-services/chassis"
+	"github.com/nayan9229/go-backend-services/services/template-service/model"
+	"github.com/rs/zerolog/log"
+)
 
 func (s *Server) GetUsers(w http.ResponseWriter, r *http.Request) (interface{}, error) {
-	return "GET USERS", nil
+	users, err := s.sqlDb.GetUsers()
+	if err != nil {
+		log.Err(err).Msg("error while fetching user list")
+		return chassis.BadRequest(w, r, err)
+	}
+	return users, nil
 }
 
 func (s *Server) GetUserByID(w http.ResponseWriter, r *http.Request) (interface{}, error) {
-	return "GET USER BY ID", nil
+	user_id := chi.URLParam(r, "userID")
+	userID, err := strconv.Atoi(user_id)
+	if err != nil {
+		log.Err(err).Msg("error while fetching user by id")
+		return chassis.BadRequest(w, r, err)
+	}
+	if userID <= 0 {
+		err = errors.New("invalid user id")
+		log.Err(err).Msg("error while fetching user by id")
+		return chassis.BadRequest(w, r, err)
+	}
+	user, err := s.sqlDb.GetUserByID(userID)
+	if err != nil {
+		log.Err(err).Msg("error while fetching user by id")
+		return chassis.BadRequest(w, r, err)
+	}
+	return user, nil
 }
 
 func (s *Server) CreateUsers(w http.ResponseWriter, r *http.Request) (interface{}, error) {
-	return "CREAT USERS", nil
+	var user model.User
+	body, err := chassis.ReadBody(r, 0)
+	if err != nil {
+		log.Error().Err(err).Msg("chassis reading req body")
+		return chassis.BadRequest(w, r, err)
+	}
+	err = json.Unmarshal(body, &user)
+	if err != nil {
+		log.Error().Err(err).Msg("chassis reading req body")
+		return chassis.BadRequest(w, r, err)
+	}
+	rand := rand.New(rand.NewSource(time.Now().UnixNano()))
+	if user.UserID <= 0 {
+		user.UserID = int(rand.Uint32())
+	}
+	err = s.sqlDb.CreateUser(&user)
+	if err != nil {
+		log.Err(err).Msg("error while creating user")
+		return chassis.BadRequest(w, r, err)
+	}
+	return chassis.NoContent(w, r)
 }
 
 func (s *Server) UpdateUserByID(w http.ResponseWriter, r *http.Request) (interface{}, error) {
-	return "UPDATE USER BY ID", nil
+	user_id := chi.URLParam(r, "userID")
+	userID, err := strconv.Atoi(user_id)
+	if err != nil {
+		log.Err(err).Msg("error while fetching user by id")
+		return chassis.BadRequest(w, r, err)
+	}
+	if userID <= 0 {
+		err = errors.New("invalid user id")
+		log.Err(err).Msg("error while fetching user by id")
+		return chassis.BadRequest(w, r, err)
+	}
+
+	var user model.User
+	body, err := chassis.ReadBody(r, 0)
+	if err != nil {
+		log.Error().Err(err).Msg("chassis reading req body")
+		return chassis.BadRequest(w, r, err)
+	}
+	err = json.Unmarshal(body, &user)
+	if err != nil {
+		log.Error().Err(err).Msg("chassis reading req body")
+		return chassis.BadRequest(w, r, err)
+	}
+	err = s.sqlDb.UpdateUser(userID, &user)
+	if err != nil {
+		log.Err(err).Msg("error while updating user")
+		return chassis.BadRequest(w, r, err)
+	}
+	return user, nil
 }
 
 func (s *Server) DeleteUserByID(w http.ResponseWriter, r *http.Request) (interface{}, error) {
-	return "DELETE USER BY ID", nil
+	user_id := chi.URLParam(r, "userID")
+	userID, err := strconv.Atoi(user_id)
+	if err != nil {
+		log.Err(err).Msg("error while fetching user by id")
+		return chassis.BadRequest(w, r, err)
+	}
+	if userID <= 0 {
+		err = errors.New("invalid user id")
+		log.Err(err).Msg("error while fetching user by id")
+		return chassis.BadRequest(w, r, err)
+	}
+	err = s.sqlDb.DeleteUser(userID)
+	if err != nil {
+		log.Err(err).Msg("error while deleting user")
+		return chassis.BadRequest(w, r, err)
+	}
+	return chassis.NoContent(w, r)
 }

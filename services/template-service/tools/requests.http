@@ -12,12 +12,33 @@ GET http://localhost:{{PORT}}/json
 ###
 GET http://localhost:{{PORT}}/users
 ###
-GET http://localhost:{{PORT}}/user/123
+GET http://localhost:{{PORT}}/user/57786696
+
 ###
 POST http://localhost:{{PORT}}/user
+content-type: application/json
+
+{
+    "first_name": "Jane",
+    "last_name": "Doe",
+    "email": "jane.doe@example.com",
+    "password": "newsecurepassword"
+}
+
 ###
 
-PATCH http://localhost:{{PORT}}/user
+PATCH http://localhost:{{PORT}}/user/57786696
+content-type: application/json
+
+{
+    "first_name": "Jane Upgrade",
+    "last_name": "Doe",
+    "email": "jane.doe@example.com",
+    "password": "newsecurepassword"
+}
+
+
 ###
-DELETE http://localhost:{{PORT}}/user
+DELETE http://localhost:{{PORT}}/user/57786696
+
 ###
