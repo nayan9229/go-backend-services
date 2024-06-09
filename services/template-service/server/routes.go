@@ -9,11 +9,17 @@ func (s *Server) routes() chi.Router {
 	r := chi.NewRouter()
 
 	// Add common middleware.
-	chassis.AddCommonMiddleware(r, true)
+	// chassis.AddCommonMiddleware(r, true)
 	r.Get("/", chassis.Health)
 	r.Get("/healthz", chassis.Health)
 	r.Get("/html", chassis.HtmlHandler(s.HtmlHandler))
 	r.Get("/json", chassis.SimpleHandler(s.JsonHandler))
+
+	r.Get("/users", chassis.SimpleHandler(s.GetUsers))
+	r.Get("/user/{userID}", chassis.SimpleHandler(s.GetUserByID))
+	r.Post("/user", chassis.SimpleHandler(s.CreateUsers))
+	r.Patch("/user", chassis.SimpleHandler(s.UpdateUserByID))
+	r.Delete("/user", chassis.SimpleHandler(s.DeleteUserByID))
 
 	return r
 }

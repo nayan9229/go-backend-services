@@ -1,0 +1,23 @@
+@PORT = 9002
+
+### 
+GET http://localhost:{{PORT}}
+
+###
+GET http://localhost:{{PORT}}/html
+
+###
+GET http://localhost:{{PORT}}/json
+
+###
+GET http://localhost:{{PORT}}/users
+###
+GET http://localhost:{{PORT}}/user/123
+###
+POST http://localhost:{{PORT}}/user
+###
+
+PATCH http://localhost:{{PORT}}/user
+###
+DELETE http://localhost:{{PORT}}/user
+###
