@@ -31,3 +31,7 @@ func NewPGClient(ctx context.Context, dbURL string, debug bool) (*PGClient, erro
 
 	return &PGClient{db}, nil
 }
+
+func (pg *PGClient) Close() error {
+	return pg.DB.Close()
+}

@@ -13,6 +13,7 @@ type DB interface {
 	CreateUser(user *model.User) error
 	UpdateUser(UserID int, user *model.User) error
 	DeleteUser(UserID int) error
+	Close() error
 }
 
 type JsonDB interface {

@@ -39,3 +39,7 @@ func NewLHClient(ctx context.Context, dbURL string, debug bool) (*LHClient, erro
 
 	return &LHClient{db}, nil
 }
+
+func (lh *LHClient) Close() error {
+	return lh.DB.Close()
+}
